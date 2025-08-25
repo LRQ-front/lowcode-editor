@@ -1,15 +1,28 @@
 import React, { useState, type MouseEventHandler } from 'react'
-import { useEffect } from "react";
 import { useComponetsStore } from "../../stores/components"
 import type { Component } from "../../stores/components"
 import { useComponentConfigStore } from "../../stores/component-config";
 import { HoverMask } from '../HoverMask';
+import SelectedMask from '../SelectMask';
 export function EditArea() {
 
-  const { components, addComponent } = useComponetsStore();
+  const { components, addComponent, curComponentId, setCurComponentId } = useComponetsStore();
   const { componentConfig } = useComponentConfigStore();
 
   const [hoverComponentId, setHoverComponentId] = useState<number>();
+
+  const handleClick: MouseEventHandler = (e) => { 
+        const path = e.nativeEvent.composedPath();
+
+        for(let i =0 ;i< path.length; i++) {
+            const ele = path[i] as HTMLElement;
+            const componentId = ele?.dataset?.componentId;
+            if (componentId) {
+                setCurComponentId(+componentId)
+                return;
+            }
+        }
+    }
 
     const handleMouseOver: MouseEventHandler = (e) => {
         const path = e.nativeEvent.composedPath();
@@ -17,7 +30,7 @@ export function EditArea() {
         for(let i = 0; i < path.length; i++) {
             const ele = path[i] as HTMLElement;
 
-            const componentId = ele.dataset.componentId;
+            const componentId = ele?.dataset?.componentId;
             if (componentId) {
                 setHoverComponentId(+componentId)
                 return;
@@ -47,9 +60,10 @@ export function EditArea() {
         })
     }
 
-    return <div className='h-[100%] edit-area' onMouseOver={handleMouseOver} onMouseLeave={() => setHoverComponentId(null)}>
+    return <div className='h-[100%] edit-area' onMouseOver={handleMouseOver} onClick={handleClick} onMouseLeave={() => setHoverComponentId(null)}>
         {renderComponents(components)}
-        {hoverComponentId && <HoverMask portalWrapperClass='portal-wrapper' containerClassName='edit-area' componentId={hoverComponentId}></HoverMask>}
+        {hoverComponentId && hoverComponentId !== curComponentId && <HoverMask portalWrapperClass='portal-wrapper' containerClassName='edit-area' componentId={hoverComponentId}></HoverMask>}
+        {curComponentId && <SelectedMask portalWrapperClass='portal-wrapper' containerClassName='edit-area' componentId={curComponentId}></SelectedMask>}
         <div className="portal-wrapper"></div>
     </div>
 }

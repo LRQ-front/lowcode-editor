@@ -5,6 +5,7 @@ import Page from "../materials/Page";
 
 export interface ComponentConfig {
     name: string;
+    desc: string;
     defaultProps: Record<string, any>;
     component: any;
 }
@@ -22,7 +23,8 @@ export const useComponentConfigStore = create<State & Actions>((set, get) => ({
         Container: {
             name: 'Container',
             defaultProps: {},
-            component: Container
+            component: Container,
+            desc: '容器'
         },
         Button: {
             name: 'Button',
@@ -30,12 +32,14 @@ export const useComponentConfigStore = create<State & Actions>((set, get) => ({
                 text: '按钮',
                 type: 'primary'
             },
-            component: Button
+            component: Button,
+            desc: '按钮'
         },
         Page: {
             name: 'Page',
             defaultProps: {},
-            component: Page
+            component: Page,
+            desc: '页面'
         }
     },
     registerComponent: (name, ComponentConfig) => {

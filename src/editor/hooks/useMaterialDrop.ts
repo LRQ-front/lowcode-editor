@@ -9,18 +9,18 @@ export function useMaterialDrop(accept: string[], id: number) {
     const [{ canDrop }, drop] = useDrop(() => ({
         accept,
         drop: (item: { type: string}, monitor) => {
-            debugger
             const didDrop = monitor.didDrop()
             if (didDrop) {
               return;
             }
 
-            const props = componentConfig[item.type].defaultProps;
+            const config = componentConfig[item.type];
 
             addComponent({
                 id: new Date().getTime(),
                 name: item.type,
-                props
+                props: config.defaultProps,
+                desc: config.desc,
             }, id)
         },
         collect: (monitor) => ({

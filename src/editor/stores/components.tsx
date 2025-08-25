@@ -3,19 +3,23 @@ import { create } from 'zustand'
 export interface Component {
     id: number
     name: string
+    desc: string
     children?: Component[]
     parentId?: number
     props: any
 }
 
 interface State {
-    components: Component[]
+    components: Component[],
+    curComponent: Component | null
+    curComponentId: number | null
 }
 
 interface Action {
     addComponent: (component: Component, parentId?: number) => void;
     deleteComponent: (id: number) => void;
     updateComponentProps: (id: number, props: any) => void;
+    setCurComponentId: (id: number | null) => void
 }
 
 
@@ -29,6 +33,14 @@ export const useComponetsStore = create<State & Action>(
                 desc: '页面'
             }
         ],
+        curComponent: null,
+        curComponentId: null,
+        setCurComponentId: (id) => {
+            set((state) => ({
+                curComponentId: id,
+                curComponent: getComponentById(id!, state.components)
+            }))
+        },
         addComponent: (component, parentId) => { 
             set((state)=> {
                 if (parentId) {
@@ -40,7 +52,7 @@ export const useComponetsStore = create<State & Action>(
                             parentElement.children = [component]
                         }
                         component.parentId = parentId
-                        return { components: state.components }
+                        return { components: [...state.components] }
                     }
                 }
 
