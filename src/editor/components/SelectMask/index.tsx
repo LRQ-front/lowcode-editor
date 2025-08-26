@@ -32,8 +32,9 @@ function SelectedMask({ containerClassName, portalWrapperClass, componentId }: S
   }, [componentId]);
 
   useEffect(() => { 
-    console.log('run updatePosition')
-    updatePosition();
+    setTimeout(() => {
+      updatePosition();
+    }, 300)
   }, [components])
 
   useEffect(() => {
