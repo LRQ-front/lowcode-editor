@@ -13,6 +13,7 @@ export interface Component {
 
 interface State {
     components: Component[],
+    mode: 'edit' | 'preview'
     curComponent: Component | null
     curComponentId: number | null
 }
@@ -23,6 +24,7 @@ interface Action {
     updateComponentProps: (id: number, props: any) => void;
     setCurComponentId: (id: number | null) => void;
     updateComponentStyles: (id: number, styles: CSSProperties, replace?: boolean) => void;
+    setMode: (mode: State['mode']) => void;
 }
 
 
@@ -36,8 +38,12 @@ export const useComponetsStore = create<State & Action>(
                 desc: '页面'
             }
         ],
+        mode: 'edit',
         curComponent: null,
         curComponentId: null,
+        setMode: (mode) => {
+            set({ mode });
+        },
         updateComponentStyles: (id, styles, replace) => {
             set((state) => {
                 const component = getComponentById(id, state.components);
