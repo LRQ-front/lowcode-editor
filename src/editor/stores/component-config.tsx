@@ -5,7 +5,6 @@ import ButtonDev from "../materials/Button/dev";
 import ButtonProd from "../materials/Button/prod";
 import PageDev from "../materials/Page/dev";
 import PageProd from "../materials/Page/prod";
-import Container from "../materials/Container/dev";
 
 export interface ComponentSetter {
     name: string;
@@ -14,13 +13,18 @@ export interface ComponentSetter {
     [key: string]: any;
 }
 
+export interface ComponentEvent {
+    name: string;
+    label: string;
+}
+
 export interface ComponentConfig {
     name: string;
     desc: string;
     defaultProps: Record<string, any>;
-    // component: any;
     setter?: ComponentSetter[];
     stylesSetter?: ComponentSetter[];
+    events?: ComponentEvent[]
     dev: any;
     prod: any;
 }
@@ -83,6 +87,16 @@ export const useComponentConfigStore = create<State & Actions>((set, get) => ({
                     type: 'inputNumber'
                 }
             ],
+           events: [
+                {
+                    name: 'onClick',
+                    label: '点击事件',
+                },
+                {
+                    name: 'onDoubleClick',
+                    label: '双击事件'
+                },
+            ],  
             dev: ButtonDev,
             prod: ButtonProd
         },
