@@ -1,51 +1,93 @@
-import { Collapse, type CollapseProps, Input, Select } from "antd";
+import { Collapse, type CollapseProps, Button } from "antd";
 import { useComponetsStore } from "../../stores/components";
-import { useComponentConfigStore } from "../../stores/component-config";
-import { GoToLink } from "./actions/GoToLink";
-import { ShowMessage } from "./actions/ShowMessage";
-
+import { useComponentConfigStore, type ComponentEvent } from "../../stores/component-config";
+import { ActionModal } from "./ActionModal";
+import { useState } from "react";
+import type { GoToLinkConfig } from "./actions/GoToLink";
+import type { ShowMessageConfig } from "./actions/ShowMessage";
+import { DeleteOutlined } from '@ant-design/icons';
 export function ComponentEvent() {
-    const { curComponent, curComponentId, updateComponentProps } = useComponetsStore();
+    const { curComponent, updateComponentProps } = useComponetsStore();
     const { componentConfig } = useComponentConfigStore();
+
+    const [actionModalVisible, setActionModalVisible] = useState(false);
+    const [curEvent, setCurEvent]= useState<ComponentEvent>();
 
     if (!curComponent) return null;
 
-    const selectAction = (eventName: string, action: string) => { 
-        if (!curComponentId) return;
+    function handleOk (config?: GoToLinkConfig | ShowMessageConfig) {
+        setActionModalVisible(false);
+        if (!config || !curEvent || !curComponent) return;
 
-        updateComponentProps(curComponentId, {[eventName]: {
-            type: action
-        }})
+        updateComponentProps(curComponent.id, {
+            [curEvent.name]: {
+                actions: [
+                    ...(curComponent.props[curEvent.name]?.actions || []),
+                    config
+                ]
+            }
+        })
     }
 
-    const items: CollapseProps["items"] = (componentConfig[curComponent?.name]?.events || []).map(item => {
+    function deleteAction (event: ComponentEvent, index: number) {
+        if(!curComponent) return;
+
+        const actions = curComponent.props[event.name]?.actions;
+        
+        actions.splice(index, 1);
+
+        updateComponentProps(curComponent.id, {
+            [event.name]: {
+                actions
+            }
+        })
+    }
+
+    const items: CollapseProps["items"] = (componentConfig[curComponent?.name]?.events || []).map(event => {
         return {
-            key: item.name,
-            label: item.label,
+            key: event.name,
+            label: <div className="flex justify-between leading-[30px]">
+                {event.label}
+                <Button type='primary' onClick={(e)=> {
+                    e.stopPropagation();
+                    setCurEvent(event);
+                    setActionModalVisible(true);
+                }}>添加动作</Button>
+            </div>,
             children: <div>
-                <div className="flex items-center">
-                    <div>动作：</div>
-                    <Select 
-                        className="w-[160px]"
-                        options={[
-                            {label: '显示提示', value: 'showMessage'},
-                            {label: '跳转链接', value: 'goToLink'}
-                        ]}
-                        value={curComponent?.props?.[item.name]?.type}
-                        onChange={(value) => {selectAction(item.name, value)}}
-                    ></Select>
-                </div>
-                 {
-                    curComponent?.props?.[item.name]?.type === 'goToLink' && <GoToLink event={item}></GoToLink>
-                }
-                  {
-                    curComponent?.props?.[item.name]?.type === 'showMessage' && <ShowMessage event={item}></ShowMessage>
+                {
+                    (curComponent.props[event.name]?.actions || []).map((item: GoToLinkConfig | ShowMessageConfig, index: number) => {
+                        return <div key={item.type}>
+                            {
+                                item.type === 'goToLink' ? <div className='border border-[#aaa] m-[10px] p-[10px] relative'>
+                                    <div className='text-[blue]'>跳转链接</div>
+                                    <div>{item.url}</div>
+                                    <div style={{ position: 'absolute', top: 10, right: 10, cursor: 'pointer' }}
+                                        onClick={() => deleteAction(event, index)}
+                                    ><DeleteOutlined /></div>
+                                </div> : null
+                            }
+                            {
+                                item.type === 'showMessage' ? <div className='border border-[#aaa] m-[10px] p-[10px] relative'>
+                                    <div className='text-[blue]'>消息弹窗</div>
+                                    <div>{item.config.type}</div>
+                                    <div>{item.config.text}</div>
+                                     <div style={{ position: 'absolute', top: 10, right: 10, cursor: 'pointer' }}
+                                        onClick={() => deleteAction(event, index)}
+                                    ><DeleteOutlined /></div>
+                                </div> : null
+                            }
+                        </div>
+                    })
                 }
             </div>
         }
     })
 
     return <div className="px-[10px]">
-        <Collapse className="mb-[10px]" items={items}></Collapse>
+        <Collapse className="mb-[10px]" items={items} defaultActiveKey={componentConfig[curComponent.name]?.events?.map(item => item.name)}></Collapse>
+        <ActionModal visible={actionModalVisible} 
+        handleOk={handleOk}
+        handleCancel={() => {setActionModalVisible(false)}}></ActionModal>
     </div>
 }
