@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ComponentEvent } from "../../../stores/component-config"
 import { useComponetsStore } from "../../../stores/components"
 import TextArea from "antd/es/input/TextArea";
@@ -10,15 +10,20 @@ export interface GoToLinkConfig {
 
 export interface GoToLinkProps {
     defaultValue?: string;
+    value?: string;
     onChange?: (config: GoToLinkConfig) => void
 }
 
 export function GoToLink (props: GoToLinkProps) {
-    const { onChange, defaultValue } = props;
+    const { onChange, defaultValue, value } = props;
 
     const { curComponentId } = useComponetsStore();
-
     const [url, setUrl] = useState(defaultValue)
+
+    // value用于回显表单，必须使用受控模式，而不能使用单单defaultValue
+    useEffect(() => {
+        setUrl(value);
+    }, [value])
 
     const urlChange = (url: string) => { 
         if (!curComponentId) return;

@@ -1,7 +1,7 @@
 import { type ComponentEvent } from "../../../stores/component-config"
 import { Input, Select } from "antd";
 import { useComponetsStore } from "../../../stores/components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface ShowMessageConfig {
     type: 'showMessage'
@@ -13,16 +13,24 @@ export interface ShowMessageConfig {
 
 export interface ShowMessageProps {
     onChange?: (config: ShowMessageConfig) => void
+    defaultValue?: ShowMessageConfig['config']
     value?: ShowMessageConfig['config']
 }
 
 export function ShowMessage(props: ShowMessageProps) {
-    const { onChange, value } = props;
+    const { onChange, defaultValue, value } = props;
 
     const { curComponentId} = useComponetsStore();
 
-    const [text, setText] = useState<string>(value?.text || '');
-    const [type, setType] = useState<'success' | 'error'>(value?.type || 'success')
+    const [text, setText] = useState<string>(defaultValue?.text || '');
+    const [type, setType] = useState<'success' | 'error'>(defaultValue?.type || 'success')
+
+    useEffect(() => {
+        if (value) {
+            setText(value.text);
+            setType(value.type);
+        }
+    }, [value])
     const messageTypeChange = (type: 'success' | 'error') => { 
         if (!curComponentId) return;
 

@@ -1,9 +1,8 @@
 import React from "react";
 import { useComponentConfigStore } from "../../stores/component-config";
 import { type Component, useComponetsStore } from "../../stores/components"
-import { type GoToLinkConfig } from "../Setting/actions/GoToLink";
-import { type ShowMessageConfig } from "../Setting/actions/ShowMessage";
 import { message } from "antd";
+import type { ActionConfig } from "../Setting/ActionModal";
 
 export function Preview() {
     const { components } = useComponetsStore();
@@ -17,7 +16,7 @@ export function Preview() {
 
             if (eventConfig) {
                 props[event.name] = () => {
-                    eventConfig.actions?.forEach((action: ShowMessageConfig | GoToLinkConfig) => {
+                    eventConfig.actions?.forEach((action: ActionConfig) => {
                         if (action.type === 'goToLink' && action.url) {
                             window.location.href = action.url
                         } else if (action.type === 'showMessage' && action.config) {
@@ -26,6 +25,17 @@ export function Preview() {
                             } else if (action.config.type === 'error') {
                                 message.error(action.config.text)
                             }
+                        } else if (action.type === 'customJS' && action.code) {
+                            // 添加参数
+                            const func = new Function('context', action.code)
+                            // 自定义js内部可以拿到参数
+                            func({
+                                name: component.name,
+                                props: component.props,
+                                showMessage: (content: string)=>{
+                                    message.success(content)
+                                }
+                            })
                         }
                     })
                 }
