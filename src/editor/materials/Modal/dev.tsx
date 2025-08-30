@@ -3,7 +3,7 @@ import type { CommonComponentProps } from "../../interface"
 
 export default function Modal({id, children, title, styles}: CommonComponentProps) {
 
-    const {canDrop, drop} = useMaterialDrop(['Button', 'Container'], id)
+    const {canDrop, drop} = useMaterialDrop(['Button', 'Container', 'Table'], id)
 
     return <div
         data-component-id={id}
