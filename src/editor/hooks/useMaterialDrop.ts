@@ -13,7 +13,6 @@ export function useMaterialDrop(accept: string[], id: number) {
             if (didDrop) {
               return;
             }
-
             const config = componentConfig[item.type];
 
             addComponent({
